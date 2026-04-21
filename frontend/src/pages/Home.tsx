@@ -1,5 +1,4 @@
 import mainBot from "/page-photos/homepage-bot.png";
-import ui1 from "/page-photos/UI-1.png";
 
 import { NavLink } from "react-router-dom";
 
