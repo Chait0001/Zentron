@@ -67,6 +67,7 @@ const Chat = () => {
 
 	const sendMsgHandler = async () => {
 		const content = inputRef.current?.value as string;
+		if (!content) return;
 
 		if (inputRef.current) inputRef.current.value = "";
 
@@ -75,9 +76,19 @@ const Chat = () => {
 
 		// send request to backend
 		setIsLoading(true);
-		const chatData = await postChatRequest(content);
-		setChatMessages([...chatData.chats]);
-		setIsLoading(false);
+		try {
+			const chatData = await postChatRequest(content);
+			if (chatData && chatData.chats) {
+				setChatMessages([...chatData.chats]);
+			} else {
+				throw new Error("Invalid response from server");
+			}
+		} catch (error: any) {
+			console.log(error);
+			toast.error("Failed to send message: " + (error.message || "Unknown error"));
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	const deleteChatsToggle = () => {
@@ -211,6 +222,12 @@ const Chat = () => {
 						maxLength={1500}
 						ref={inputRef}
                         rows={1}
+						onKeyDown={(e) => {
+							if (e.key === "Enter" && !e.shiftKey) {
+								e.preventDefault();
+								sendMsgHandler();
+							}
+						}}
 						disabled={isLoadingChats || isLoading ? true : false}
 						placeholder='Enter your query here'
 					/>

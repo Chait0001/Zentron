@@ -34,7 +34,7 @@ export const generateChatCompletion = async (
 		// make request to openAi
 		// get latest response
 		const chatResponse = await openai.createChatCompletion({
-			model: "gpt-3.5-turbo",
+			model: "llama-3.3-70b-versatile",
 			messages: chats,
 		});
 
@@ -43,8 +43,8 @@ export const generateChatCompletion = async (
 		await user.save();
 
 		return res.status(200).json({ chats: user.chats });
-	} catch (error) {
-		console.log(error);
+	} catch (error: any) {
+		console.log(error.response?.data || error.message);
 		return res.status(500).json({ message: error.message });
 	}
 };
