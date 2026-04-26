@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zentron AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-body: #0a0a0f;
+            --bg-sidebar: #0e0e1c;
+            --sidebar-border: rgba(99, 102, 241, 0.2);
+            --accent: #6366f1;
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%);
+            --text-primary: #e0e0ff;
+            --text-muted: #555577;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Sidebar Layout */
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--sidebar-border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            padding: 24px 16px;
+            z-index: 10;
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-svg {
+            width: 48px;
+            height: 48px;
+            filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.4));
+        }
+
+        .brand-name {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-top: 12px;
+            color: white;
+        }
+
+        .brand-subtitle {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .new-chat-btn {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+            margin-bottom: 24px;
+        }
+
+        .new-chat-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent);
+        }
+
+        .recent-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding: 0 8px;
+        }
+
+        .recent-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .recent-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: rgba(224, 224, 255, 0.6);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .recent-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+        }
+
+        .recent-item.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+            font-weight: 500;
+        }
+
+        .user-profile {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+        }
+
+        .user-info .username {
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .user-info .status {
+            font-size: 10px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+        }
+
+        /* Main Area Layout */
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+        }
+
+        .top-bar {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .top-bar .title {
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .logout-btn {
+            padding: 6px 14px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            scroll-behavior: smooth;
+        }
+
+        /* Empty State */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 100px;
+        }
+
+        .empty-state h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .suggestion-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            width: 100%;
+            max-width: 640px;
+        }
+
+        .suggestion-card {
+            padding: 20px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .suggestion-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent);
+        }
+
+        .suggestion-card .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .suggestion-card .card-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Messages */
+        .message-row {
+            display: flex;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            gap: 16px;
+        }
+
+        .message-row.user {
+            justify-content: flex-end;
+        }
+
+        .message-avatar {
+            width: 28px;
+            height: 28px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 14px 18px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .user .message-bubble {
+            background: var(--accent);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .assistant .message-bubble {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            border-top-left-radius: 4px;
+            overflow-x: auto;
+        }
+
+        .message-bubble pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 16px;
+            border-radius: 8px;
+            margin: 12px 0;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .message-bubble code {
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        .message-bubble pre code {
+            background: transparent;
+            padding: 0;
+        }
+
+        /* Input Bar */
+        .input-area {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto 32px auto;
+            padding: 0 20px;
+        }
+
+        .input-wrapper {
+            background-color: var(--bg-sidebar);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
+            padding: 10px;
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: white;
+            font-family: inherit;
+            font-size: 14px;
+            padding: 8px 12px;
+            resize: none;
+            max-height: 200px;
+            min-height: 24px;
+        }
+
+        .send-btn {
+            width: 36px;
+            height: 36px;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .input-hint {
+            text-align: center;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-top: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Typing Indicator */
+        .typing {
+            display: flex;
+            gap: 4px;
+            padding: 4px 0;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+        <div class="logo-container">
+            <svg class="logo-svg" viewBox="0 0 100 100">
+                <defs>
+                    <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#38bdf8;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <path d="M50 5 L90 27.5 L90 72.5 L50 95 L10 72.5 L10 27.5 Z" fill="url(#hexGrad)" />
+                <!-- 3D Cube Outline -->
+                <path d="M50 30 L80 45 L80 75 L50 90 L20 75 L20 45 Z" fill="none" stroke="white" stroke-width="2" />
+                <path d="M50 30 L50 90" fill="none" stroke="white" stroke-width="2" />
+                <path d="M50 60 L80 45" fill="none" stroke="white" stroke-width="2" />
+                <path d="M50 60 L20 45" fill="none" stroke="white" stroke-width="2" />
+            </svg>
+            <div class="brand-name">ZENTRON</div>
+        </div>
+
+        <button class="new-chat-btn" onclick="newChat()">
+            <span>+</span> New Conversation
+        </button>
+
+        <div class="recent-label">Recent</div>
+        <div class="recent-list" id="recentList">
+            <div class="recent-item active">💬 Python script help</div>
+            <div class="recent-item">💬 Essay feedback</div>
+            <div class="recent-item">💬 Startup ideas</div>
+        </div>
+
+        <div class="user-profile">
+            <div class="avatar">Z</div>
+            <div class="user-info">
+                <div class="username">testuser12</div>
+                <div class="status">
+                    <div class="status-dot"></div>
+                    Online
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Area -->
+    <div class="main-area">
+        <div class="top-bar">
+            <div class="title">Zentron</div>
+            <button class="logout-btn" onclick="logout()">Log out</button>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState">
+                <h2>What can I help with?</h2>
+                <div class="suggestion-grid">
+                    <div class="suggestion-card" onclick="setPrompt('Write a Python script for data scraping')">
+                        <div class="card-title">Write code</div>
+                        <div class="card-desc">Python, JS, and more</div>
+                    </div>
+                    <div class="suggestion-card" onclick="setPrompt('Give me 5 business ideas for 2024')">
+                        <div class="card-title">Brainstorm ideas</div>
+                        <div class="card-desc">Creative thinking</div>
+                    </div>
+                    <div class="suggestion-card" onclick="setPrompt('Explain Quantum Entanglement simply')">
+                        <div class="card-title">Explain concepts</div>
+                        <div class="card-desc">Clear and simple</div>
+                    </div>
+                    <div class="suggestion-card" onclick="setPrompt('Help me edit my cover letter')">
+                        <div class="card-title">Improve writing</div>
+                        <div class="card-desc">Essays, emails, docs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="input-wrapper">
+                <textarea id="userInput" placeholder="Message Zentron..." rows="1" oninput="autoResize(this)"></textarea>
+                <button class="send-btn" onclick="sendMessage()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+            <div class="input-hint">Enter to send · Shift+Enter for new line</div>
+        </div>
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chatContainer');
+        const emptyState = document.getElementById('emptyState');
+        const userInput = document.getElementById('userInput');
+        const recentList = document.getElementById('recentList');
+
+        // State management
+        let chats = JSON.parse(localStorage.getItem('zentron_chats')) || [];
+        let currentChatId = null;
+        let messageHistory = [];
+
+        // Initialize
+        function init() {
+            renderSidebar();
+            if (chats.length > 0) {
+                // Optional: load latest chat
+                // loadChat(chats[0].id);
+            }
+        }
+
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        function setPrompt(text) {
+            userInput.value = text;
+            autoResize(userInput);
+            userInput.focus();
+        }
+
+        async function getGroqResponse(messages) {
+            try {
+                const response = await fetch(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer YOUR_GROQ_API_KEY_HERE"
+                        },
+                        body: JSON.stringify({
+                            model: "llama-3.3-70b-versatile",
+                            messages: messages,
+                            max_tokens: 1024,
+                            temperature: 0.7
+                        })
+                    }
+                );
+                
+                if (!response.ok) throw new Error('API request failed');
+                const data = await response.json();
+                return data.choices[0].message.content;
+            } catch (error) {
+                console.error('Groq Error:', error);
+                return "Something went wrong, please try again.";
+            }
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // First message of a new chat?
+            if (!currentChatId) {
+                currentChatId = Date.now();
+                messageHistory = [
+                    { role: "system", content: "You are Zentron, a helpful AI assistant." }
+                ];
+                chats.unshift({ id: currentChatId, title: text, history: messageHistory });
+            }
+
+            // Hide empty state
+            emptyState.style.display = 'none';
+
+            // Add user message
+            addMessage(text, 'user');
+            messageHistory.push({ role: "user", content: text });
+            
+            userInput.value = '';
+            userInput.style.height = 'auto';
+
+            // Update local storage
+            saveToLocal();
+            renderSidebar();
+
+            // AI Typing Indicator
+            const typingId = addTypingIndicator();
+            const aiReply = await getGroqResponse(messageHistory);
+            
+            removeTypingIndicator(typingId);
+            addMessage(aiReply, 'assistant');
+            
+            if (aiReply !== "Something went wrong, please try again.") {
+                messageHistory.push({ role: "assistant", content: aiReply });
+                saveToLocal();
+            }
+        }
+
+        function saveToLocal() {
+            const chatIdx = chats.findIndex(c => c.id === currentChatId);
+            if (chatIdx !== -1) {
+                chats[chatIdx].history = messageHistory;
+                localStorage.setItem('zentron_chats', JSON.stringify(chats));
+            }
+        }
+
+        function renderSidebar() {
+            recentList.innerHTML = '';
+            chats.forEach(chat => {
+                const item = document.createElement('div');
+                item.className = `recent-item ${chat.id === currentChatId ? 'active' : ''}`;
+                item.innerHTML = `💬 ${chat.title.substring(0, 20)}${chat.title.length > 20 ? '...' : ''}`;
+                item.onclick = () => loadChat(chat.id);
+                recentList.appendChild(item);
+            });
+        }
+
+        function loadChat(id) {
+            const chat = chats.find(c => c.id === id);
+            if (!chat) return;
+
+            currentChatId = id;
+            messageHistory = chat.history;
+            
+            chatContainer.innerHTML = '';
+            emptyState.style.display = 'none';
+            
+            messageHistory.forEach(msg => {
+                if (msg.role !== 'system') {
+                    addMessage(msg.content, msg.role === 'user' ? 'user' : 'assistant');
+                }
+            });
+            renderSidebar();
+        }
+
+        function addMessage(text, role) {
+            const row = document.createElement('div');
+            row.className = `message-row ${role}`;
+            const avatar = role === 'assistant' ? '<div class="message-avatar">Z</div>' : '';
+            const content = role === 'assistant' ? marked.parse(text) : text;
+            
+            row.innerHTML = `${avatar}<div class="message-bubble">${content}</div>`;
+            chatContainer.appendChild(row);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function addTypingIndicator() {
+            const id = 'typing-' + Date.now();
+            const row = document.createElement('div');
+            row.className = 'message-row assistant';
+            row.id = id;
+            row.innerHTML = `
+                <div class="message-avatar">Z</div>
+                <div class="message-bubble">
+                    <div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                </div>
+            `;
+            chatContainer.appendChild(row);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return id;
+        }
+
+        function removeTypingIndicator(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function newChat() {
+            currentChatId = null;
+            messageHistory = [];
+            chatContainer.innerHTML = '';
+            chatContainer.appendChild(emptyState);
+            emptyState.style.display = 'flex';
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            renderSidebar();
+        }
+
+        function logout() {
+            // Optional: Clear user data if needed
+            // localStorage.removeItem('zentron_chats');
+            window.location.href = 'http://localhost:5173/';
+        }
+
+        init();
+    </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 import Header from "./components/shared/Header";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -10,11 +10,13 @@ import styles from "./App.module.css";
 
 function App() {
 	const auth = useAuth();
+	const location = useLocation();
+	const isChatPage = location.pathname === "/chat";
 	
 	return (
 		<div>
-			<Header />
-			<main className={styles.routes}>
+			{!isChatPage && <Header />}
+			<main className={!isChatPage ? styles.routes : ""}>
 				<Routes>
 					<Route path='/' element={<Home />} />
 					<Route path='/login' element={<Login />} />
