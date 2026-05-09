@@ -15,7 +15,7 @@ const app = express();
 
 // Middlewares
 
-const allowedOrigins = ["http://localhost:5173", process.env.FRONTEND_URL];
+const allowedOrigins = ["http://localhost:5173", "http://localhost:5174", process.env.FRONTEND_URL];
 app.use(
 	cors({
 		origin: (origin, callback) => {
