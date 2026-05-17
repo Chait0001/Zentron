@@ -16,7 +16,7 @@ type Props = {
 	onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 	inputPH?: string;
 	labelPH?: string;
-    name:string
+  name:string
 };
 
 const FormLabel = (props: Props) => {

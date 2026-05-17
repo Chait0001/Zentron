@@ -11,10 +11,7 @@ import Button from "../components/shared/Button";
 
 import { useAuth } from "../context/context";
 
-import axios from "axios";
 import toast from "react-hot-toast";
-axios.defaults.baseURL = "http://localhost:5001/api";
-axios.defaults.withCredentials = true; // Enable sending credentials (e.g., cookies) in cross-origin requests
 
 const Signup = () => {
 	const [buttonName, setButtonName] = useState("SignUp");
