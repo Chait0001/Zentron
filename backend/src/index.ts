@@ -33,8 +33,8 @@ app.use(cookieParser(process.env.COOKIE_SECRET))
 app.use(morgan("dev")); // for development
 
 // routes
-app.use("/api/user/", userRoutes);
-app.use("/api/chat/", chatRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Connections and Listeners
 mongoose
