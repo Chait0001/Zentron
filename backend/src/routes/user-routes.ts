@@ -5,7 +5,7 @@ import {
 	userSignUp,
 	userLogin,
 	verifyUserStatus,
-    logoutUser
+  logoutUser
 } from "../controllers/user-controllers.js";
 
 import {
