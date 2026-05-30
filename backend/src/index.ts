@@ -15,9 +15,23 @@ const app = express();
 
 // Middlewares
 
+const allowedOrigins = [
+	process.env.FRONTEND_URL,
+	"https://zentron-chi.vercel.app",
+	"http://localhost:5175",
+	"http://localhost:5173",
+];
+
 app.use(cors({
-	origin: process.env.FRONTEND_URL,
-	credentials:true
+	origin: function (origin, callback) {
+		// allow requests with no origin (mobile apps, curl, etc.)
+		if (!origin) return callback(null, true);
+		if (allowedOrigins.includes(origin)) {
+			return callback(null, true);
+		}
+		return callback(new Error("Not allowed by CORS"));
+	},
+	credentials: true,
 }))
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET))
